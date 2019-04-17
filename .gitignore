@@ -1,5 +1,6 @@
 node_modules
 *.bak
+nodemon.json
 .vscode
 .DS_Store
 
