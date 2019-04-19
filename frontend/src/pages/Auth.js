@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import AuthContext from '../context/auth-context'
 
 import './Auth.css'
 
@@ -13,6 +14,8 @@ class AuthPage extends Component {
     this.emailEl = React.createRef()
     this.passwordEl = React.createRef()
   }
+
+  static contextType = AuthContext
 
   submitHandler = (event) => {
     event.preventDefault()
@@ -65,7 +68,13 @@ class AuthPage extends Component {
         return res.json()
       })
       .then(resData => {
-        console.log('J-E-L-L-O! ', resData)
+        if (resData.data.login.token) {
+          this.context.login(
+            resData.data.login.token, 
+            resData.data.login.userId,
+            resData.data.login.tokenExpiration
+          )
+        }
       })
       .catch(err => {
         console.log('createUser post: ', err)
@@ -81,6 +90,7 @@ class AuthPage extends Component {
   render () {
     return (
       <form className='auth-form' onSubmit={this.submitHandler}>
+        <h4>{this.state.isLogin ? 'Log in' : 'Sign up'}</h4>
         <div className='form-control'>
           <label htmlFor='email'>email</label>
           <input type='email' id='email' ref={this.emailEl} />
