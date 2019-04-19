@@ -9,14 +9,16 @@ body {
 }
 
 .form-control label,
-.form-control input {
+.form-control input,
+.form-control textarea {
   width: 100%;
   display: block;
 }
 
-.form-control input {
+.form-control input,
+.form-control textarea {
   padding: 0.5rem;
-  font-size: 0.75rem;
+  font-size: 1rem;
   border-radius: 5px;
 }
 
