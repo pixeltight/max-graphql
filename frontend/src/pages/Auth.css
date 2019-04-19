@@ -4,36 +4,3 @@
   margin: 5rem auto;
 }
 
-.form-control label,
-.form-control input {
-  width: 100%;
-  display: block;
-}
-
-.form-control input {
-  padding: 0.5rem;
-  font-size: 0.75rem;
-  border-radius: 5px;
-}
-
-.form-control {
-  margin-bottom: 1rem;
-}
-
-.form-actions button {
-  background: #271f98;
-  border: 1px solid #271f98;
-  font: inherit;
-  border-radius: 3px;
-  padding: 0.25rem 1rem;
-  margin-right: 0.75rem;
-  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
-  color: #FFF;
-  cursor: pointer;
-}
-
-.form-actions button:hover,
-.form-actions button:active {
-  background: #015870;
-  border-color: #015870;
-}
