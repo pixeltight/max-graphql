@@ -104,10 +104,6 @@ class EventsPage extends Component {
             description
             date
             price
-            creator {
-              _id
-              email
-            }
           }
         }
       `
@@ -130,7 +126,19 @@ class EventsPage extends Component {
         return res.json()
       })
       .then(resData => {
-        this.fetchEvents()
+        this.setState(prevState => {
+          const updatedEvents = [...this.state.events]
+          updatedEvents.push({
+            _id: resData.data.createEvent,
+            title: resData.data.createEvent.title,
+            description: resData.data.createEvent.description,
+            price: resData.data.createEvent.price,
+            date: resData.data.createEvent.date,
+            creator: {
+              _id: this.context.userId
+            }
+          })
+        })
       })
       .catch(err => {
         console.log('createEvent post: ', err)
