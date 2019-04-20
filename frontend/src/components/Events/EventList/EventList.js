@@ -10,8 +10,11 @@ const eventList = props => {
         key={evt._id}
         eventId={evt._id}
         title={evt.title}
+        price={evt.price}
+        date={evt.date}
         userId={props.authUserId}
-        creatorId={evt.creator._id} />
+        creatorId={evt.creator._id}
+        onDetail={props.onViewDetail} />
     )
   })
 
