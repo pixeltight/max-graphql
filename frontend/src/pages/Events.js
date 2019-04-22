@@ -26,6 +26,8 @@ class EventsPage extends Component {
   
   static contextType = AuthContext
 
+  isActive = true
+
   componentDidMount() {
     this.fetchEvents()
   }
@@ -54,7 +56,7 @@ class EventsPage extends Component {
       method: 'POST',
       body: JSON.stringify(requestBody),
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       }
     })
       .then(res => {
@@ -65,7 +67,9 @@ class EventsPage extends Component {
       })
       .then(resData => {
         const events = resData.data.events
-        this.setState({ events: events, isLoading: false })
+        if (this.isActive) {
+          this.setState({ events: events, isLoading: false })
+        }
       })
       .catch(err => {
         console.log('events query err: ', err)
@@ -162,7 +166,49 @@ class EventsPage extends Component {
     })
   }
 
-  bookEventHandler = () => {}
+  bookEventHandler = () => {
+    if (!this.context.token) {
+      this.setState({ selectedEvent: null })
+      return
+    }
+    const requestBody = {
+      query: `
+        mutation {
+          bookEvent(eventId: "${this.state.selectedEvent._id}") {
+            _id
+            createdAt  
+            updatedAt
+          }
+        }
+      `
+    }
+
+    fetch('http://localhost:8000/graphql', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this.context.token
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error('Create Booking failed')
+        }
+        return res.json()
+      })
+      .then(resData => {
+        console.log(resData)
+        this.setState({ selectedEvent: null })
+      })
+      .catch(err => {
+        console.log('booking post err: ', err)
+      })
+  }
+
+  componentWillUnmount () {
+    this.active = false
+  }
 
   render () {
     return (
@@ -198,7 +244,7 @@ class EventsPage extends Component {
           <Modal title={this.state.selectedEvent.title}
             onCancel = {this.modalCancelHandler}
             onConfirm = {this.bookEventHandler}
-            confirmText = 'Book Event'
+            confirmText = {this.context.token ? 'Book Event' : 'Confirm'}
             canCancel 
             canConfirm>
             <h1>{this.state.selectedEvent.title}</h1>
