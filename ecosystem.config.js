@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     name: 'aws-graphql',
     script: './app.js',
-    node_args: 'dotenv/config'
+    node_args: '.env'
   }],
   deploy: {
     production: {
