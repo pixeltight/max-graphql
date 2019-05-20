@@ -4,3 +4,4 @@ nodemon.json
 .vscode
 .DS_Store
 .env
+frontend
