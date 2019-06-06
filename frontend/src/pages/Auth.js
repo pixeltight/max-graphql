@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import AuthContext from '../context/auth-context'
+import Spinner from '../components/Spinner/Spinner'
 
 import './Auth.css'
 
@@ -8,7 +9,13 @@ class AuthPage extends Component {
     super(props)
 
     this.state = {
-      isLogin: true
+      isLogin: true,
+      isLoading: false,
+      signupComplete: false,
+      signupError: false,
+      signupData: '',
+      loginComplete: false,
+      loginData: ''
     }
 
     this.emailEl = React.createRef()
@@ -17,7 +24,7 @@ class AuthPage extends Component {
 
   static contextType = AuthContext
 
-  submitHandler = (event) => {
+  createUserHandler = (event) => {
     event.preventDefault()
 
     const email = this.emailEl.current.value
@@ -26,41 +33,18 @@ class AuthPage extends Component {
     if (email.trim().length === 0 || password.trim() === 0) {
       return
     }
-
+    
+    this.setState({ isLoading: true })
     let requestBody = {
       query: `
-        query Login($email: String!, $password: String!) {
-          login(email: $email, password: $password) {
-            userId
-            token
-            tokenExpiration
+        mutation {
+          createUser(userInput: { email: "${email}", password: "${password}" }) {
+            _id
+            email
           }
         }
-      `,
-      variables: {
-        email: email,
-        password: password
-      }
+      `
     }
-
-    if (!this.state.isLogin) {
-      requestBody = {
-        query: `
-          mutation CreateUser($email: String!, $password: String!) {
-            createUser(userInput: { email: $email, password: $password }) {
-              _id
-              email
-            }
-          }
-        `,
-        variables: {
-          email: email,
-          password: password
-        }
-      }
-    }
-
-    console.log(JSON.stringify(requestBody))
 
     fetch(process.env.REACT_APP_API_URL, {
       method: 'POST',
@@ -70,36 +54,116 @@ class AuthPage extends Component {
       }
     })
       .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Create user POST failed')
-        }
         return res.json()
       })
       .then(resData => {
-        if (resData.data.login.token) {
-          this.context.login(
-            resData.data.login.token, 
-            resData.data.login.userId,
-            resData.data.login.tokenExpiration
-          )
+        if (resData.errors) {
+          console.log(resData.errors[0].message)
+          this.setState({
+            isLoading: false,
+            isLogin: false,
+            signupError: true,
+            signupData: resData.errors[0].message
+          })
+        } else {
+          this.setState({
+            isLoading: false,
+            isLogin: true,
+            signupComplete: true,
+            signupData: resData.data.createUser.email
+          })
         }
+
       })
       .catch(err => {
-        console.log('createUser post: ', err)
+        console.log('createUser error: ', err)
       })
+  }
+
+  loginHandler = (event) => {
+    event.preventDefault()
+
+    const email = this.emailEl.current.value
+    const password = this.passwordEl.current.value
+
+    if (email.trim().length === 0 || password.trim() === 0) {
+      return
+    }
+    
+    this.setState({ isLoading: true })
+    let requestBody = {
+      query: `
+        query {
+          login(email: "${email}", password: "${password}") {
+            userId
+            token
+            email
+            tokenExpiration
+          }
+        }
+      `
+    }
+
+    fetch(process.env.REACT_APP_API_URL, {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => {
+      return res.json()
+    })
+    .then(resData => {
+      if (resData.errors) {
+        console.log(resData.errors[0].message)
+        this.setState({
+          isLoading: false,
+          loginError: true,
+          loginData: resData.errors[0].message
+        })
+      } else {
+        this.setState({
+          isLoading: false,
+        })
+        this.context.login(
+          resData.data.login.token, 
+          resData.data.login.userId,
+          resData.data.login.email,
+          resData.data.login.tokenExpiration
+        )
+      }
+    })
+    .catch(err => {
+      console.log('login error: ', err)
+    })
   }
 
   switchModeHandler = () => {
     this.setState(prevState => {
-      return { isLogin: !prevState.isLogin }
+      return { 
+        isLogin: !prevState.isLogin,
+        signupComplete: false,
+        signupError: false,
+        loginError: false
+      }
     })
   }
 
   render () {
-    return (
-      <form className='auth-form' onSubmit={this.submitHandler}>
-        <h4>{this.state.isLogin ? 'Log in' : 'Sign up'}</h4>
-        <div className='form-control'>
+    const content = (
+      this.state.isLoading ?
+      <Spinner /> :
+      <form className='auth-form' onSubmit={this.state.isLogin ? this.loginHandler : this.createUserHandler}>
+        <h3 className='auth-form__header'>{this.state.isLogin ? 'Sign in' : 'Create Account'}</h3>
+        <div className='auth-form__alert'>{!this.state.isLogin && this.state.signupError ? this.state.signupData : ''}</div>
+        <div className='auth-form__alert'>{this.state.isLogin && this.state.loginError ? this.state.loginData : ''}</div>
+        {this.state.isLogin && this.state.signupComplete ?
+          <div className='auth-form__success'>
+            Thank you for registering {this.state.signupData}. Please sign in to continue.
+          </div> :
+          ''}
+        <div className='form-control auth-form__spacer'>
           <label htmlFor='email'>email</label>
           <input type='email' id='email' ref={this.emailEl} />
         </div>
@@ -108,12 +172,24 @@ class AuthPage extends Component {
           <input type='password' id='password' ref={this.passwordEl} />
         </div>
         <div className='form-actions'>
-          <button type='submit'>Submit</button>
-          <button type='button' onClick={this.switchModeHandler}>
-            Switch to {this.state.isLogin ? 'Sign up' : 'Login'}
-          </button>
+          <p className='form-actions__text-container'>
+            <button type='submit'>Submit</button>
+            {this.state.isLogin ?
+              'Not a member?' :
+              'Already have an account?'
+            }
+            {' '}
+            <span onClick={this.switchModeHandler} className={'form-actions__link'}>
+            {this.state.isLogin ? 'Sign up.' : 'Sign in.'}
+          </span>
+          </p>
         </div>
       </form>
+    )
+    return (
+      <React.Fragment>
+        {content}
+      </React.Fragment>
     )
   }
 }

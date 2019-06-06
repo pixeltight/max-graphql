@@ -4,3 +4,30 @@
   margin: 5rem auto;
 }
 
+.auth-form__header {
+  margin-bottom: 0;
+}
+
+.auth-form__spacer {
+  margin-top: 0.75rem;
+}
+
+.form-actions__link {
+  color: #271f98;
+  cursor: pointer;
+}
+
+.form-actions__link:hover {
+  text-decoration: underline;
+}
+
+.auth-form__alert {
+  color: #900;
+  margin-top: 0.75rem;
+}
+
+.auth-form__success {
+  color: #129900;
+  margin-top: 0.75rem;
+}
+

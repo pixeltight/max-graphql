@@ -23,6 +23,7 @@ const mainNavigation = props => {
                   <React.Fragment>
                     <li><NavLink to='/bookings'>Bookings</NavLink></li>
                     <li><button onClick={context.logout}>Logout</button></li>
+                    <li className='main-navigation__items-welcome'><p>Welcome,</p>{context.email}</li>
                   </React.Fragment>
                 )}
               </ul>

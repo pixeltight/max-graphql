@@ -7,6 +7,7 @@ module.exports = {
     try {
       const existingUser = await User.findOne({ email: args.userInput.email })
       if (existingUser) {
+        console.log('User already exists')
         throw new Error('User already exists')
       }
       const hashedPw = await bcrypt.hash(args.userInput.password, 12)
@@ -31,6 +32,7 @@ module.exports = {
     }
     const isEqual = await bcrypt.compare(password, user.password)
     if (!isEqual) {
+      console.log('Password is incorrect!')
       throw new Error('Password is incorrect!')
     }
     const token = jwt.sign(
@@ -41,6 +43,7 @@ module.exports = {
     return {
       userId: user.id,
       token: token,
+      email: user.email,
       tokenExpiration: 1
     }
   }

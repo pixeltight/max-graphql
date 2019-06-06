@@ -13,17 +13,21 @@ class App extends Component {
   state = {
     token: null,
     userId: null,
+    email: null,
+    tokenExpiration: null
   }
 
-  login = (token, userId, tokenExpiration) => {
+  login = (token, userId, email, tokenExpiration) => {
     this.setState({
       token: token,
-      userId: userId
+      userId: userId,
+      email: email,
+      tokenExpiration: tokenExpiration
     })
   }
 
   logout = () => {
-    this.setState({ token: null, userId: null })
+    this.setState({ token: null, userId: null, email: null })
   }
 
   render () {
@@ -33,6 +37,7 @@ class App extends Component {
           value={{
             token: this.state.token,
             userId: this.state.userId,
+            email: this.state.email,
             login: this.login,
             logout: this.logout
             }}>
@@ -43,7 +48,7 @@ class App extends Component {
               {this.state.token && <Redirect from='/auth' to='/events' exact />}
               {!this.state.token && <Route path='/auth' component={AuthPage} />}
               <Route path='/events' component={EventsPage} />
-              {this.state.token&& <Route path='/bookings' component={BookingsPage} />}
+              {this.state.token && <Route path='/bookings' component={BookingsPage} />}
               {!this.state.token && <Redirect to='/auth' exact />}
             </Switch>
           </main>

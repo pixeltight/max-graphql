@@ -27,6 +27,7 @@
   margin: 0;
   padding: 0;
   display: flex;
+  align-items: center;
 }
 
 .main-navigation__items li {
@@ -51,6 +52,15 @@
 .main-navigation__items button:hover,
 .main-navigation__items button:active {
   color: #271f98;
-  background: #FFF;
+  background-color: #FFF;
   border-radius: 5px;
+}
+
+.main-navigation__items-welcome {
+  color: #FFF;
+  font-size: 0.75em;
+}
+
+.main-navigation__items-welcome p {
+  margin: 0;
 }
